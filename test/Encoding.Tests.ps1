@@ -1,13 +1,25 @@
 
-Describe "Get-Bom" {
-    It "Given valid -Path '<Path>', it returns '<Expected>'" -TestCases @(
-        @{ Path = "$PSScriptRoot\ascii.txt"; Expected = @() },
-        @{ Path = "$PSScriptRoot\bigendianunicode.txt"; Expected = "utf16be" },
-        @{ Path = "$PSScriptRoot\unicode.txt"; Expected = "utf16le" },
-        @{ Path = "$PSScriptRoot\utf32.txt"; Expected = "utf32le" },
-        @{ Path = "$PSScriptRoot\utf8.txt"; Expected = "utf8" }
+Import-Module "$PSScriptRoot\..\Encoding" -Force
+
+
+Describe "Test-Encoding" {
+    It "Given valid -Path '<Path>' and -Encoding '<Encoding>', it returns '<Expected>'" -TestCases @(
+        @{ Path = "$PSScriptRoot\ascii.txt"; Encoding = "ascii"; Expected = $true },
+        @{ Path = "$PSScriptRoot\bigendianunicode.txt"; Encoding = "utf16be"; Expected = $true },
+        @{ Path = "$PSScriptRoot\unicode.txt"; Encoding = "utf16le"; Expected = $true },
+        @{ Path = "$PSScriptRoot\utf32.txt"; Encoding = "utf32le"; Expected = $true },
+        @{ Path = "$PSScriptRoot\utf8.txt"; Encoding = "utf8"; Expected = $true },
+        @{ Path = "$PSScriptRoot\ascii.txt"; Expected = $true },
+        @{ Path = "$PSScriptRoot\unicode.txt"; Expected = $true },
+        @{ Path = "$PSScriptRoot\utf32.txt"; Encoding = "utf8"; Expected = $false },
+        @{ Path = "$PSScriptRoot\bad.txt"; Encoding = "ascii"; Expected = $false }
     ) {
-        param ($Path, $Expected)
-        &"$PSScriptRoot\..\Get-Bom" $Path | Should -Be $Expected
+        Param($Path, $Encoding, $Expected)
+        if ($Encoding) {
+            Test-Encoding -Path $Path -Encoding $Encoding | Should -Be $Expected
+        } else {
+            Test-Encoding -Path $Path                     | Should -Be $Expected            
+        }
     }
 }
+

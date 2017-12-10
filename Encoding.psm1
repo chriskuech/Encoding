@@ -79,11 +79,10 @@ General notes
 #>
 function Test-Parseable {
     Param(
-        [Parameter(Mandatory, ParameterSetName="Infer")]
-        [Parameter(Mandatory, ParameterSetName="Specific")]
+        [Parameter(Mandatory)]
         [ValidateScript( {Test-Path $_ -PathType Leaf} )]
         [string]$Path,
-        [Parameter(Mandatory, ParameterSetName="Specific")]
+        [Parameter(Mandatory)]
         [ValidateSet("ascii", "utf8", "utf16be", "utf16le", "utf32be", "utf32le")]
         [string]$Encoding
     )
@@ -149,29 +148,26 @@ Test-Encoding ".\myFile.txt" -Encoding "utf8"
 #>
 function Test-Encoding {
     Param(
-        [Parameter(Mandatory, ParameterSetName="Infer")]
-        [Parameter(Mandatory, ParameterSetName="Specific")]
+        [Parameter(Mandatory)]
         [ValidateScript( {Test-Path $_ -PathType Leaf} )]
         [string]$Path,
-        [Parameter(Mandatory, ParameterSetName="Specific")]
         [ValidateSet("ascii", "utf8", "utf16be", "utf16le", "utf32be", "utf32le")]
         [string]$Encoding
     )
 
-    # 
     $bom = Get-Bom $Path
     if ($bom) {
         if ($Encoding) {
-            return $bom -eq $Encoding -and (Test-Parseable $Encoding)
+            return $bom -eq $Encoding -and (Test-Parseable $Path $Encoding)
         } else {
-            return Test-Parseable $bom
+            return Test-Parseable $Path $bom
         }
     } else {
         if ($Encoding) {
-            return ("ascii", "utf8") -contains $Encoding -and (Test-Parseable $Encoding)
+            return $Encoding -in ("ascii", "utf8") -and (Test-Parseable $Path $Encoding)
         } else {
-            return Test-Parseable "ascii"
+            return Test-Parseable $Path "ascii"
         }
     }
-
 }
+
