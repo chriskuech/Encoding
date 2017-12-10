@@ -1,10 +1,11 @@
 Param(
+    [Parameter(Mandatory)]
     [ValidateScript({ Test-Path $_ -PathType Leaf })]
     [string]$Path
 )
 
 $boms = @{
-    "utf8" = (239, 187, 191)
+    "utf8"    = (239, 187, 191)
     "utf16be" = (254, 255)
     "utf16le" = (255, 254)
     "utf32be" = (0, 0, 254, 255)
